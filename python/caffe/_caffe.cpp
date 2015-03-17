@@ -208,7 +208,6 @@ bp::object Blob_Reshape(bp::tuple args, bp::dict kwargs) {
   return bp::object();
 }
 
-
 bp::object BlobVec_add_blob(bp::tuple args, bp::dict kwargs) {
   if (bp::len(kwargs) > 0) {
     throw std::runtime_error("BlobVec.add_blob takes no kwargs");
@@ -223,7 +222,7 @@ bp::object BlobVec_add_blob(bp::tuple args, bp::dict kwargs) {
   // We need to explicitly return None to use bp::raw_function.
   return bp::object();
 }
-    
+
 // LayerParameter
 shared_ptr<LayerParameter> LayerParameter_Init(bp::object py_layer_param) {
   shared_ptr<LayerParameter> layer_param(new LayerParameter);
