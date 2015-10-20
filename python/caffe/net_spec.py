@@ -133,8 +133,13 @@ class Function(object):
             return
         bottom_names = []
         for inp in self.inputs:
-            inp._to_proto(layers, names, autonames)
-            bottom_names.append(layers[inp.fn].top[inp.n])
+            if isinstance(inp, tuple):
+                for i in inp:
+                    i._to_proto(layers, names, autonames)
+                bottom_names.append(layers[i.fn].top[i.n]) 
+            else:
+                inp._to_proto(layers, names, autonames)
+                bottom_names.append(layers[inp.fn].top[inp.n])
         layer = caffe_pb2.LayerParameter()
         layer.type = self.type_name
         layer.bottom.extend(bottom_names)
@@ -143,7 +148,11 @@ class Function(object):
             layer.top.extend(layer.bottom)
         else:
             for top in self.tops:
-                layer.top.append(self._get_top_name(top, names, autonames))
+                if isinstance(top, tuple):
+                    for t in top:
+                        layer.top.append(self._get_top_name(t, names, autonames))
+                else:
+                    layer.top.append(self._get_top_name(top, names, autonames))
         layer.name = self._get_name(names, autonames)
 
         for k, v in six.iteritems(self.params):
@@ -176,11 +185,22 @@ class NetSpec(object):
         return self.tops[name]
 
     def to_proto(self):
-        names = {v: k for k, v in six.iteritems(self.tops)}
+        names = {}
+        for k,v in six.iteritems(self.tops):
+            if isinstance(v, tuple):
+                for vv in v:
+                    names[vv] = k
+            else:
+                names[v] = k
+        #names = {v: k for k, v in six.iteritems(self.tops)}
         autonames = Counter()
         layers = OrderedDict()
         for name, top in six.iteritems(self.tops):
-            top._to_proto(layers, names, autonames)
+            if isinstance(top, tuple):
+                for top_sub in top:
+                    top_sub._to_proto(layers, names, autonames)
+            else:
+                top._to_proto(layers, names, autonames)
         net = caffe_pb2.NetParameter()
         net.layer.extend(layers.values())
         return net
