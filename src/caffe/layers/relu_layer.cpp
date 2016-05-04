@@ -40,6 +40,7 @@ void ReLULayer<Dtype>::Deconv_cpu(const vector<Blob<Dtype>*>& top,
     const vector<bool>& propagate_down,
     const vector<Blob<Dtype>*>& bottom) {
   if (propagate_down[0]) {
+    Dtype* top_data = top[0]->mutable_cpu_data();
     const Dtype* top_diff = top[0]->cpu_diff();
     Dtype* bottom_diff = bottom[0]->mutable_cpu_diff();
     const int count = bottom[0]->count();
@@ -47,7 +48,11 @@ void ReLULayer<Dtype>::Deconv_cpu(const vector<Blob<Dtype>*>& top,
     if (negative_slope != Dtype(0))
       LOG(WARNING) << "negative_slope parameter = " << negative_slope << " but nonzero negative_slope params are not supported for Deconv through RELU.";
     for (int i = 0; i < count; ++i) {
-      bottom_diff[i] = std::max(top_diff[i], Dtype(0));
+      if (top_data[i] > 0) {
+        bottom_diff[i] = std::max(top_diff[i], Dtype(0));
+      } else {
+        bottom_diff[i] = Dtype(0);
+      }
     }
   }
 }
