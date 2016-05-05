@@ -329,20 +329,23 @@ BOOST_PYTHON_MODULE(_caffe) {
           NdarrayCallPolicies()));
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Blob<Dtype>);
 
+    bp::class_<LayerParameter, shared_ptr<LayerParameter> >(
+      "LayerParameter", bp::no_init)
+    .def("__init__", bp::make_constructor(&LayerParameter_Init))
+    .def("from_python", &LayerParameter_FromPython)
+    .def("_to_python", &LayerParameter_ToPython);
+
+
   bp::class_<Layer<Dtype>, shared_ptr<PythonLayer<Dtype> >,
     boost::noncopyable>("Layer", bp::init<const LayerParameter&>())
     .add_property("blobs", bp::make_function(&Layer<Dtype>::blobs,
           bp::return_internal_reference<>()))
     .def("setup", &Layer<Dtype>::LayerSetUp)
     .def("reshape", &Layer<Dtype>::Reshape)
+    .def("toproto", &Layer<Dtype>::ToProto)
     .add_property("type", bp::make_function(&Layer<Dtype>::type));
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Layer<Dtype>);
 
-  bp::class_<LayerParameter, shared_ptr<LayerParameter> >(
-      "LayerParameter", bp::no_init)
-    .def("__init__", bp::make_constructor(&LayerParameter_Init))
-    .def("from_python", &LayerParameter_FromPython)
-    .def("_to_python", &LayerParameter_ToPython);
 
   bp::class_<Solver<Dtype>, shared_ptr<Solver<Dtype> >, boost::noncopyable>(
     "Solver", bp::no_init)
